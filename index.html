@@ -6,13 +6,19 @@
     <link rel="stylesheet" href="css.css">
 </head>
 <body>
-<div class="btn btn_input"  onclick="addNewCocktail()">Добавить рецепт</div>
-<div class="btn btn_info" onclick="getRecipe()">Найти рецепт</div>
-<div class="btn btn_delete" onclick="deleteCocktail()">Удалить рецепт</div>
-<div class="btn btn_show_all" onclick="printNamesCocktais()">Показать все коктейли</div>
+<div class="btn btn_input" onclick="addItem('drink')">Добавить коктейль</div>
+<div class="btn btn_info" onclick="showItem('drink')">Найти коктейль</div>
+<div class="btn btn_delete" onclick="deleteItem('drink')">Удалить коктейль</div>
+<div class="btn btn_show_all" onclick="showAll('drink')">Показать все коктейли</div>
 <div id="block_info"></div>
 
+<div class="btn btn_input" onclick="addItem('food')">Добавить блюдо</div>
+<div class="btn btn_info" onclick="showItem('food')">Найти блюдо</div>
+<div class="btn btn_delete" onclick="deleteItem('food')">Удалить блюдо</div>
+<div class="btn btn_show_all" onclick="showAll('food')">Показать все блюда</div>
 
-<script src="HashStorage.js"></script>
+
+
+<script src="localeStorage.js"></script>
 </body>
 </html>

@@ -36,6 +36,6 @@ body{
     font-size: 30px;
     border: solid 1px #3f3f3f;
     box-sizing: border-box;
-    white-space: pre-wrap;
+    white-space: normal;
     padding: 15px;
 }
