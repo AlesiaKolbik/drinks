@@ -4,21 +4,146 @@
     <meta charset="UTF-8">
     <title>Drinks</title>
     <link rel="stylesheet" href="css.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 </head>
 <body>
-<div class="btn btn_input" onclick="addItem('drink')">Добавить коктейль</div>
-<div class="btn btn_info" onclick="showItem('drink')">Найти коктейль</div>
-<div class="btn btn_delete" onclick="deleteItem('drink')">Удалить коктейль</div>
-<div class="btn btn_show_all" onclick="showAll('drink')">Показать все коктейли</div>
+<div data-info="drink">
+    <div class="btn btn_input">Добавить коктейль</div>
+    <div class="btn btn_info">Найти коктейль</div>
+    <div class="btn btn_delete">Удалить коктейль</div>
+    <div class="btn btn_show_all">Показать все коктейли</div>
+</div>
 <div id="block_info"></div>
+<div data-info="food">
+    <div class="btn btn_input" >Добавить блюдо</div>
+    <div class="btn btn_info">Найти блюдо</div>
+    <div class="btn btn_delete">Удалить блюдо</div>
+    <div class="btn btn_show_all">Показать все блюда</div>
+</div>
 
-<div class="btn btn_input" onclick="addItem('food')">Добавить блюдо</div>
-<div class="btn btn_info" onclick="showItem('food')">Найти блюдо</div>
-<div class="btn btn_delete" onclick="deleteItem('food')">Удалить блюдо</div>
-<div class="btn btn_show_all" onclick="showAll('food')">Показать все блюда</div>
+<script type="module">
+    import {TLocalStorage} from './localeStorage.js';
 
 
 
-<script src="localeStorage.js"></script>
+    const drinkStorage = new TLocalStorage(window.localStorage, 'drinks');
+    const foodStorage = new TLocalStorage(window.localStorage, 'food');
+
+    document.addEventListener('click', click);
+
+    function click(e) {
+        e = e.target;
+
+        if(e.classList.contains('btn')){
+            let type = e.parentNode.getAttribute('data-info');
+            if(e.classList.contains('btn_input')){
+                addItem(type);
+            }
+            else if(e.classList.contains('btn_info')){
+                showItem(type);
+            }
+            else if(e.classList.contains('btn_delete')){
+                deleteItem(type);
+            }
+            else if(e.classList.contains('btn_show_all')){
+                showAll(type);
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    function askUser(type, ask) {
+        if (type === 'drink' && ask === "description") {
+            const isAlcohol = confirm("Коктейль алкогольный?") ? "да" : "нет";
+            const recipe = prompt("Введите рецет приготовления.", "Водка – 37 мл, Шоколадный ликер(коричневый) – 25 мл, Кола (сильно охлажденная) – 25 мл ");
+            return `Алкогольный: ${isAlcohol};${recipe.split(",").join(";")}`;
+        }
+        else if (type === 'food' && ask === "description") {
+            const recipe = prompt("Введите рецет приготовления.", "Крупа гречневая - 1 по вкусу, Грибы свежие - 200 г, Лук репчатый - 2, Сметана - 5 ");
+            return `${recipe.split(",").join(";")}`;
+        }
+        else if (type === 'drink' && ask === "name") {
+            return prompt("Введите название коктейля:", "Пиранья");
+        }
+        else if (type === 'food' && ask === "name") {
+            return prompt("Введите название блюда:", "Гречка по-белорусски");
+        }
+    }
+
+    function addItem(type) {
+        let name = null;
+        let description;
+
+        while (!name) {
+            name = askUser(type, 'name');
+        }
+        description = askUser(type, 'description');
+        if (type === 'drink') {
+            drinkStorage.save({name, description});
+        }
+        else {
+            foodStorage.save({name, description});
+        }
+    }
+
+    function showItem(type) {
+        const name = askUser(type, 'name');
+        let result;
+
+        if (type === 'drink') {
+            result = drinkStorage.find(name);
+        }
+        else {
+            result = foodStorage.find(name);
+        }
+
+        if (result) {
+            document.getElementById("block_info").innerHTML = result.description.replace(/;/g, '<br/>');
+        }
+        else {
+            alert("Такой рецепт не найден.");
+        }
+    }
+
+    function deleteItem(type) {
+        const name = askUser(type, 'name');
+        let storage;
+        if (type === 'drink') {
+            storage = drinkStorage;
+        }
+        else {
+            storage = foodStorage;
+        }
+
+        if (storage.find(name) === undefined) {
+            alert("Такой рецепт не найден.");
+        }
+        else {
+            storage.remove(name);
+            alert("Рецепт удален.");
+        }
+    }
+
+    function showAll(type) {
+        let recipeNames;
+        if (type === 'drink') {
+            recipeNames = drinkStorage.findAll();
+        }
+        else {
+            recipeNames = foodStorage.findAll();
+        }
+        if (recipeNames.length !== 0) {
+            document.getElementById("block_info").innerHTML = recipeNames.join('<br/>');
+        }
+        else {
+            document.getElementById("block_info").textContent = "Нет ни одного рецепта."
+        }
+}
+</script>
 </body>
 </html>
