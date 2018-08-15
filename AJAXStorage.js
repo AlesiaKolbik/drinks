@@ -1,17 +1,16 @@
 export class AJAXStorage{
-    constructor(key,  arr){
+    constructor(obj, key){
         this.ajaxHandlerScript="http://fe.it-academy.by/AjaxStringStorage2.php";
-        this.name = 'k-drinks-storage';
         this.key = key;
-        this.arr = arr;
+        this.name = 'k-'+ this.key + '-storage';
+        this.obj = obj;
         this.saveInfo();
-        this.messages = null;
     }
     saveInfo() {
-        let info = {
-            key : this.key,
-            info : this.arr
-        };
+
+        let info = this.obj;
+        console.log(this.name);
+        console.log(info);
         $.ajax( {
                 url : this.ajaxHandlerScript, type : 'POST', cache : false, dataType:'json',
                 data : { f : 'INSERT', n : this.name, v : JSON.stringify(info)},

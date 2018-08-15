@@ -19,13 +19,13 @@ import { AJAXStorage } from './AJAXStorage.js';
 
     _setData(arr){
         this.dataSource.setItem(this.key, JSON.stringify(arr));
-         let ajaxStorage = new AJAXStorage(this.key,  arr);
     }
 
     save(item) {
         const arr = this._getData();
         arr.push(item);
         this._setData(arr);
+        let ajaxStorage = new AJAXStorage(item, this.key);
     }
 
     find(name) {
