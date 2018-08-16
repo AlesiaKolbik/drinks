@@ -6,6 +6,7 @@ import { AJAXStorage } from './AJAXStorage.js';
     constructor(source, key) {
         this.dataSource = source;
         this.key = key;
+        this.ajaxStorage = new AJAXStorage();
 
     }
 
@@ -25,7 +26,7 @@ import { AJAXStorage } from './AJAXStorage.js';
         const arr = this._getData();
         arr.push(item);
         this._setData(arr);
-        let ajaxStorage = new AJAXStorage(item, this.key);
+        this.ajaxStorage.saveInfo(item, this.key);
     }
 
     find(name) {
