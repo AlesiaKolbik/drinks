@@ -15,60 +15,49 @@ export class AJAXStorage {
         $.ajax(
             {
                 url: this.ajaxHandlerScript,
-                type: 'POST', dataType: 'json',
+                type: 'POST',cache: false, dataType: 'json',
                 data: {
                     f: 'LOCKGET', n: this.name,
                     p: this.password
                 },
-                cache: false,
+
                 success: this.lockGetReady,
                 error: this.errorHandler
             })
     }
-
-    /*insertNewArray() {
-        $.ajax(
-            {
-                url: this.ajaxHandlerScript,
-                type: 'POST', dataType: 'json',
-                data: {
-                    f: 'INSERT', n: this.name,
-                    v: JSON.stringify([1, 2])
-                },
-                cache: false,
-                success: this.saveInfo,
-                error: this.errorHandler
-            })
-    }*/
-
     lockGetReady(callresult) {
-        if (callresult.error !== undefined)
+        if (callresult.error != undefined){
             console.log(callresult.error);
+        }
         else {
-            this.array = [];
-
-            if (callresult.result !== "") // либо строка пустая - сообщений нет
-            {
-                // либо в строке - JSON-представление массива сообщений
-                this.array = JSON.parse(callresult.result);
-                if (!Array.isArray(this.array))
-                    this.array = [];
-            }
-
-            this.array.push({type: self.key, name: self.obj.name, descrip: self.obj.description});
+            let array = [];
+            array.push({type: self.key, name: self.obj.name, descrip: self.obj.description});
             $.ajax({
-                url: this.ajaxHandlerScript,
-                type: 'POST', dataType: 'json',
+                url: self.ajaxHandlerScript,
+                type: 'POST',cache: false, dataType:'json',
                 data: {
-                    f: 'UPDATE', n: this.name,
-                    v: JSON.stringify(this.array), p: this.password
+                    f: 'UPDATE', n: self.name,
+                    v: JSON.stringify(array), p: self.password
                 },
-                cache: false,
-                success: this.updateReady,
-                error: this.errorHandler
+                success: self.updateReady, error: self.errorHandler
             });
         }
     }
+
+    insertNewArray() {
+        $.ajax(
+            {
+                url: this.ajaxHandlerScript,
+                type: 'GET',cache: false, dataType: 'json',
+                data: {
+                    f: 'INSERT', n: this.name,
+                    v: JSON.stringify([])
+                },
+                success: this.lockGetReady,
+                error: this.errorHandler
+            })
+    };
+
 
     errorHandler(jqXHR, statusStr, errorStr) {
         alert(statusStr + ' ' + errorStr);

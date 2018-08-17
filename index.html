@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <title>Drinks</title>
     <link rel="stylesheet" href="css.css">
-    <script
-            src="https://code.jquery.com/jquery-3.3.1.js"
-            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
-            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 </head>
 <body>
 <div data-info="drink">
@@ -24,10 +21,151 @@
     <div class="btn btn_show_all">Показать все блюда</div>
 </div>
 
-<script type="module">
-    import {TLocalStorage} from './localeStorage.js';
+<script>
 
 
+    class AJAXStorage {
+        constructor() {
+            let self = this;
+            this.ajaxHandlerScript = "http://fe.it-academy.by/AjaxStringStorage2.php";
+            this.name = 'Kolbik';
+            this.password = 222;
+            this.obj = null;
+            this.key = null;
+            this.save = function () {
+                $.ajax(
+                    {
+                        url: self.ajaxHandlerScript,
+                        type: 'POST',cache: false, dataType: 'json',
+                        data: {
+                            f: 'LOCKGET', n: self.name,
+                            p: self.password
+                        },
+
+                        success: lockGetReady,
+                        error: errorHandler
+                    })
+            };
+
+            function lockGetReady(callresult) {
+                if (callresult.error != undefined){
+                    console.log(callresult.error);
+                }
+                else {
+                    let array = [];
+                    let response = JSON.parse(callresult.result);
+                    for(let i =0;i< response.length;i++){
+                        array.push(response[i]);
+                    }
+                    array.push({type: self.key, name: self.obj.name, descrip: self.obj.description});
+                    $.ajax({
+                        url: self.ajaxHandlerScript,
+                        type: 'POST',cache: false, dataType:'json',
+                        data: {
+                            f: 'UPDATE', n: self.name,
+                            v: JSON.stringify(array), p: self.password
+                        },
+                        success: updateReady, error:errorHandler
+                    });
+                }
+            }
+
+            /*function insertNewArray() {
+                $.ajax(
+                    {
+                        url: this.ajaxHandlerScript,
+                        type: 'GET',cache: false, dataType: 'json',
+                        data: {
+                            f: 'INSERT', n: this.name,
+                            v: JSON.stringify([])
+                        },
+                        success: this.lockGetReady,
+                        error: this.errorHandler
+                    })
+            }*/
+
+            /*this.read = function() {
+               $.ajax(
+                   {
+                       url: self.ajaxHandlerScript,
+                       type: 'POST',cache: false, dataType: 'json',
+                       data: {
+                           f: 'READ', n: self.name,
+                       },
+                       success: readReady,
+                       error: errorHandler
+                   })
+           };*/
+
+
+            function errorHandler(jqXHR, statusStr, errorStr) {
+                alert(statusStr + ' ' + errorStr);
+            }
+
+            function updateReady(callresult) {
+                if (callresult.error !== undefined)
+                    alert(callresult.error);
+            }
+
+        }
+        setData(item, key){
+            this.obj = item;
+            this.key = key;
+            this.save();
+        }
+
+    }
+
+
+    class TLocalStorage {
+        constructor(source, key) {
+            this.dataSource = source;
+            this.key = key;
+            this.ajaxStorage = new AJAXStorage();
+
+        }
+
+        _getData(){
+            const value = this.dataSource.getItem(this.key);
+            if(value) {
+                return JSON.parse(value);
+            }
+            return [];
+        }
+
+        _setData(arr){
+            this.dataSource.setItem(this.key, JSON.stringify(arr));
+        }
+
+        save(item) {
+            const arr = this._getData();
+            arr.push(item);
+            this._setData(arr);
+            this.ajaxStorage.setData(item, this.key);
+        }
+
+        find(name) {
+            const arr = this._getData();
+            return arr.find((item) => { return item.name === name; });
+        }
+
+        remove(name) {
+            let arr = this._getData();
+            arr = arr.filter(function(item) {
+                return item.name !== name;
+            });
+            this._setData(arr);
+        }
+
+        findAll() {
+            const arr = this._getData();
+            const keys = [];
+            for (let i = 0; i < arr.length; i++) {
+                keys.push(arr[i].name);
+            }
+            return keys;
+        }
+    }
 
     const drinkStorage = new TLocalStorage(window.localStorage, 'drinks');
     const foodStorage = new TLocalStorage(window.localStorage, 'food');
