@@ -57,7 +57,7 @@
                     for(let i =0;i< response.length;i++){
                         array.push(response[i]);
                     }
-                    array.push({type: self.key, name: self.obj.name, descrip: self.obj.description});
+                    array.push({type: self.key, name: self.obj.name, description: self.obj.description});
                     $.ajax({
                         url: self.ajaxHandlerScript,
                         type: 'POST',cache: false, dataType:'json',
@@ -84,19 +84,6 @@
                     })
             }*/
 
-            /*this.read = function() {
-               $.ajax(
-                   {
-                       url: self.ajaxHandlerScript,
-                       type: 'POST',cache: false, dataType: 'json',
-                       data: {
-                           f: 'READ', n: self.name,
-                       },
-                       success: readReady,
-                       error: errorHandler
-                   })
-           };*/
-
 
             function errorHandler(jqXHR, statusStr, errorStr) {
                 alert(statusStr + ' ' + errorStr);
@@ -114,6 +101,18 @@
             this.save();
         }
 
+        getDataPromise(){
+            const promise = $.when(
+                $.ajax(
+                    {
+                        url: this.ajaxHandlerScript,
+                        type: 'POST',cache: false, dataType: 'json',
+                        data: {
+                            f: 'READ', n: this.name,
+                        },
+                    }));
+            return promise;
+        }
     }
 
 
@@ -122,16 +121,31 @@
             this.dataSource = source;
             this.key = key;
             this.ajaxStorage = new AJAXStorage();
-
+            this.ajaxStorage.getDataPromise().then(
+                    obj => {this._setDataAjax(JSON.parse(obj.result))},
+                    err => console.log(err.error)
+                );
         }
 
-        _getData(){
+        _getData() {
             const value = this.dataSource.getItem(this.key);
-            if(value) {
+
+            if (value) {
                 return JSON.parse(value);
             }
             return [];
+
         }
+        _setDataAjax(arr){
+            let newArr = [];
+            let key;
+            for(let i = 0;i<arr.length;i++){
+                key = arr[i]['type'];
+                newArr.push(arr[i]);
+            }
+            this.dataSource.setItem(key, JSON.stringify(newArr));
+        }
+
 
         _setData(arr){
             this.dataSource.setItem(this.key, JSON.stringify(arr));
@@ -145,7 +159,8 @@
         }
 
         find(name) {
-            const arr = this._getData();
+            let arr = this._getData();
+            console.log(arr);
             return arr.find((item) => { return item.name === name; });
         }
 
@@ -244,7 +259,7 @@
         }
 
         if (result) {
-            document.getElementById("block_info").innerHTML = result.description.replace(/;/g, '<br/>');
+            document.getElementById("block_info").innerHTML = result.descrip || result.description || result.name;
         }
         else {
             alert("Такой рецепт не найден.");
